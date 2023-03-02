@@ -10,14 +10,14 @@ app.use(bodyParser.json());
 
 const server = http.createServer(app)
 
-app.post('/stop', async (req, res) => {
+app.get('/stop', async (req, res) => {
   port.write(1)
   return res.json({
     estado: "parado"
   });
 });
 
-app.post('/start', async (req, res) => {
+app.get('/start', async (req, res) => {
   port.write(0)
   return res.json({
     estado: "iniciado"
@@ -34,7 +34,6 @@ const io = socketIo(server, {
 io.on('connection',(socket)=>{
   console.log('client connected: ',socket.id)
   
-  // socket.join('clock-room')
   socket.join('serial-data')
   
   socket.on('disconnect',(reason)=>{
@@ -43,15 +42,8 @@ io.on('connection',(socket)=>{
 })
 
 port.on('readable', function () {
-  // console.log('Data:', port.read())
   io.to('serial-data').emit('lectura', port.read())
 })
-
-
-// setInterval(()=>{
-//      io.to('clock-room').emit('time', new Date())
-// },1000)
-
 
 
 
