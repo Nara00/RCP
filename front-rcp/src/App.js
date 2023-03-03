@@ -1,6 +1,9 @@
 import React from 'react'
 import { io } from 'socket.io-client'
 import { useState, useEffect } from 'react'
+import Grid from '@mui/material/Grid';
+import Card from './Card';
+import Box from '@mui/material/Box';
 
 const App = () => {
   const [time, setTime] = useState('fetching')
@@ -31,8 +34,30 @@ const App = () => {
   }, [simulationStatus]);
 
   return (
-    <div className="App">
-      {time}
+
+    <div style={{
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      width: '100wh',
+      height: '100vh'
+    }}>
+      <Grid container sx={(theme) => ({
+        justifyContent: "center"
+        // '& > div': {
+          // justifyContent: "center",
+        // }
+      })}>
+        <Grid item>
+          <Card />
+        </Grid>
+        <Grid item>
+          <Card />
+        </Grid>
+        <Grid item>
+          <Card />
+        </Grid>
+      </Grid>
     </div>
   )
 }
