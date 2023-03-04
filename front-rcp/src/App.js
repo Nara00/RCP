@@ -11,7 +11,6 @@ const App = () => {
   const [presion, setPresion] = useState('fetching')
   const [distancia, setDistancia] = useState('fetching')
   const [frecuencia, setFrecuencia] = useState('fetching')
-
   const [simulationStatus, setSimulationStatus] = useState(0)
 
   useEffect(() => {
@@ -22,6 +21,9 @@ const App = () => {
     })
     //  socket.on('time', (data)=>setTime(data))
     socket.on('lectura', (data) => setTime(data))
+    socket.on('presion', (data) => setPresion(data))
+    socket.on('frecuencia', (data) => setFrecuencia(data))
+    socket.on('distancia', (data) => setDistancia(data))
     socket.on('disconnect', () => setTime('server disconnected'))
   }, [])
 
@@ -35,12 +37,15 @@ const App = () => {
         console.log("error");
       }
     }
+    console.log("useeffect")
     simulationStatus === 1 ? fetchData("start") : fetchData("stop");
   }, [simulationStatus]);
 
   return (
     <>
-      <p> {time} </p>
+      <p> Presion: {presion} </p>
+      <p> Frecuencia: {frecuencia} </p>
+      <p> Distancia: {distancia} </p>
       <div style={{
         display: "flex",
         alignItems: "center",
