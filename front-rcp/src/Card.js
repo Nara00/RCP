@@ -59,23 +59,6 @@ const Card = () => {
                 </Grid>
             </Paper>
         </div>
-        // <Grid item xs={4}  >
-        //     <Grid container style={{
-        //         backgroundColor: '#FFFFFF',
-        //         height: "3rem"
-        //     }}>
-        //         <Grid item xs={2} style={{
-        //             backgroundColor: '#00FF00',
-        //             margin: '2rem',
-        //             height: '100%',
-        //         }}> p </Grid>
-        //         <Grid item style={{
-        //             margin: '2rem',
-        //             height: '100%',
-        //         }}>
-        //         </Grid>
-        //     </Grid>
-        // </Grid>
     )
 }
 

@@ -4,9 +4,14 @@ import { useState, useEffect } from 'react'
 import Grid from '@mui/material/Grid';
 import Card from './Card';
 import Box from '@mui/material/Box';
+import { Button } from '@mui/material';
 
 const App = () => {
   const [time, setTime] = useState('fetching')
+  const [presion, setPresion] = useState('fetching')
+  const [distancia, setDistancia] = useState('fetching')
+  const [frecuencia, setFrecuencia] = useState('fetching')
+
   const [simulationStatus, setSimulationStatus] = useState(0)
 
   useEffect(() => {
@@ -29,36 +34,45 @@ const App = () => {
       } catch (error) {
         console.log("error");
       }
-      simulationStatus === 1 ? fetchData("start") : fetchData("stop");
     }
+    simulationStatus === 1 ? fetchData("start") : fetchData("stop");
   }, [simulationStatus]);
 
   return (
-
-    <div style={{
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      width: '100wh',
-      height: '100vh'
-    }}>
-      <Grid container sx={(theme) => ({
-        justifyContent: "center"
-        // '& > div': {
+    <>
+      <p> {time} </p>
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: '100wh',
+        height: '50vh'
+      }}>
+        <Grid container sx={(theme) => ({
+          justifyContent: "center"
+          // '& > div': {
           // justifyContent: "center",
-        // }
-      })}>
-        <Grid item>
-          <Card />
+          // }
+        })}>
+
+          <Grid item>
+            <Card />
+          </Grid>
+          <Grid item>
+            <Card />
+          </Grid>
+          <Grid item>
+            <Card />
+          </Grid>
         </Grid>
-        <Grid item>
-          <Card />
-        </Grid>
-        <Grid item>
-          <Card />
-        </Grid>
-      </Grid>
-    </div>
+
+      </div>
+      <div style={{ textAlign: '-webkit-center' }}>
+        <Button variant="contained" onClick={() => setSimulationStatus(1)}>Iniciar</Button>
+        <Button variant="contained" onClick={() => setSimulationStatus(0)}>Detener</Button>
+      </div>
+      
+    </>
   )
 }
 export default App;
