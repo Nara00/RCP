@@ -24,36 +24,55 @@ const App = () => {
   const [presion, setPresion] = useState('fetching')
   const [distancia, setDistancia] = useState('fetching')
   const [frecuencia, setFrecuencia] = useState('fetching')
+  const [fallo, setFallo] = useState(false)
   const [simulationStatus, setSimulationStatus] = useState(0)
   const [openOk, setOpenOk] = useState(false);
   const [openNoOk, setOpenNoOk] = useState(false);
+  const [openUsuario, setOpenUsuario] = useState(false);
+
 
   useEffect(() => {
     const socket = io('http://localhost:5000')
     socket.on('connect', () => console.log(socket.id))
     socket.on('connect_error', () => {
-      setTimeout(() => socket.connect(), 50) // 5000
+      setTimeout(() => socket.connect(), 5000)
     })
     //  socket.on('time', (data)=>setTime(data))
     socket.on('lectura', (data) => setTime(data))
-    socket.on('presion', (data) => setPresion(data))
-    socket.on('frecuencia', (data) => setFrecuencia(data))
-    socket.on('distancia', (data) => setDistancia(data))
+    socket.on('presion', (data) => setPresion(parseInt(data)))
+    socket.on('frecuencia', (data) => setFrecuencia(parseInt(data)))
+    socket.on('distancia', (data) => setDistancia(parseInt(data)))
+    socket.on('fallo', (data) => setFallo(data))
     socket.on('disconnect', () => setTime('server disconnected'))
   }, [])
 
   useEffect(() => {
-    async function fetchData(action) {
-      try {
-        const response = await fetch(
-          "http://localhost:5000/" + action
-        );
-      } catch (error) {
-        console.log("error");
-      }
+    if (fallo) {
+      setEstaCorriendo(false);
+      setSimulationStatus(0);
+      setContador(0);
+      setDistancia('fetching');
+      setFrecuencia('fetching');
+      setPresion('fetching');
+      setFallo(false);
+      setOpenNoOk(true);
     }
-    console.log("useeffect")
-    simulationStatus === 1 ? fetchData("start") : fetchData("stop");
+  }, [fallo])
+
+  useEffect(() => {
+    if (!openNoOk) {
+      async function fetchData(action) {
+        try {
+          const response = await fetch(
+            "http://localhost:5000/" + action
+          );
+        } catch (error) {
+          console.log("error");
+        }
+      }
+      console.log("useeffect")
+      simulationStatus === 1 ? fetchData("start") : fetchData("stop");
+    }
   }, [simulationStatus]);
 
 
@@ -76,7 +95,7 @@ const App = () => {
   }, [presion])
 
   useEffect(() => {
-    if (distancia <= 40 && distancia >= 65) {
+    if (distancia <= 40 || distancia >= 65) {
       setEstadoDistancia(1)
     }
     else if (distancia > 40 && distancia < 65) {
@@ -88,7 +107,7 @@ const App = () => {
   }, [distancia])
 
   useEffect(() => {
-    if (frecuencia <= 60 && frecuencia >= 80) {
+    if (frecuencia <= 60 || frecuencia >= 80) {
       setEstadoFrecuencia(1)
     }
     else if (frecuencia > 60 && frecuencia < 80) {
@@ -129,9 +148,15 @@ const App = () => {
     setEstaCorriendo(false);
     setSimulationStatus(0);
     setContador(0);
+    setDistancia('fetching');
+    setFrecuencia('fetching');
+    setPresion('fetching');
   };
 
   const tiempoRestante = 300 - contador;
+  const _distancia = `${distancia / 10}`;
+  const _presion = presion == 0 ? '--' : 'ok';
+  const _frecuencia = `${frecuencia}`;
 
   return (
     <>
@@ -146,10 +171,9 @@ const App = () => {
             </p>
           </Grid>
           <Grid container item xs={12} style={{ justifyContent: "space-between" }}>
-            {/* <Card valor={"2.0"} tipo="presión" estado={estadoPresion} enabled={simulationStatus === 1} /> */}
-            <Card valor={presion && presion != "fetching" ? presion : "--"} tipo="presión" estado={estadoPresion} enabled={simulationStatus === 1} />
-            <Card valor={distancia && distancia != "fetching" ? distancia : "--"} tipo="distancia" estado={estadoDistancia} enabled={simulationStatus === 1} />
-            <Card valor={frecuencia && frecuencia != "fetching" ? frecuencia : "--"} tipo="frecuencia" estado={estadoFrecuencia} enabled={simulationStatus === 1} />
+            <Card valor={presion >= 0 ? _presion : "--"} tipo="presión" estado={estadoPresion} enabled={simulationStatus === 1} />
+            <Card valor={distancia >= 0 ? _distancia : "--"} tipo="profundidad" estado={estadoDistancia} enabled={simulationStatus === 1} />
+            <Card valor={frecuencia >= 0 ? _frecuencia : "--"} tipo="frecuencia" estado={estadoFrecuencia} enabled={simulationStatus === 1} />
           </Grid>
           <Grid container item xs={12} style={{
             justifyContent: "flex-end",
@@ -167,7 +191,7 @@ const App = () => {
               }}>{convertirSegundosAMinutos(tiempoRestante)}</p>
             </Grid>
             <Grid item>
-              <IconButton id='pause-circle-button' disabled={simulationStatus === 0} onClick={finalizarSimulacion}
+              <IconButton id='pause-circle-button' disabled={!estaCorriendo} onClick={finalizarSimulacion}
                 style={{
                   backgroundColor: !estaCorriendo ? "var(--disabled-grey)" : "var(--botones)",
                   color: "#FFFFFF",
@@ -177,7 +201,7 @@ const App = () => {
               </IconButton>
             </Grid>
             <Grid item>
-              <IconButton disabled={simulationStatus === 1} onClick={empezarSimulacion}
+              <IconButton disabled={estaCorriendo} onClick={empezarSimulacion}
                 style={{
                   backgroundColor: estaCorriendo ? "var(--disabled-grey)" : "var(--botones)",
                   color: "#FFFFFF",
