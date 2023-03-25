@@ -8,6 +8,15 @@ import { Button, IconButton } from '@mui/material';
 // import { PauseCircle, PlayCircle, StopCircle } from '@mui/icons-material';
 import { Pause, PlayArrow, Stop } from '@mui/icons-material';
 import './App.css'
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+
+function convertirSegundosAMinutos(segundos) {
+  const minutos = Math.floor(segundos / 60);
+  const segundosRestantes = segundos % 60;
+  return `${minutos < 10 ? "0" : ""}${minutos}:${segundosRestantes < 10 ? "0" : ""
+    }${segundosRestantes}`;
+}
+
 
 const App = () => {
   //captación de datos
@@ -16,12 +25,14 @@ const App = () => {
   const [distancia, setDistancia] = useState('fetching')
   const [frecuencia, setFrecuencia] = useState('fetching')
   const [simulationStatus, setSimulationStatus] = useState(0)
+  const [openOk, setOpenOk] = useState(false);
+  const [openNoOk, setOpenNoOk] = useState(false);
 
   useEffect(() => {
     const socket = io('http://localhost:5000')
     socket.on('connect', () => console.log(socket.id))
     socket.on('connect_error', () => {
-      setTimeout(() => socket.connect(), 5000)
+      setTimeout(() => socket.connect(), 50) // 5000
     })
     //  socket.on('time', (data)=>setTime(data))
     socket.on('lectura', (data) => setTime(data))
@@ -60,7 +71,7 @@ const App = () => {
       setEstadoPresion(3)
     }
     else {
-      setEstadoPresion(1)
+      setEstadoPresion(0)
     }
   }, [presion])
 
@@ -72,7 +83,7 @@ const App = () => {
       setEstadoDistancia(3)
     }
     else {
-      setEstadoDistancia(2)
+      setEstadoDistancia(0)
     }
   }, [distancia])
 
@@ -89,50 +100,38 @@ const App = () => {
   }, [frecuencia])
 
 
-  //timer
+  const [contador, setContador] = useState(0);
+  const [estaCorriendo, setEstaCorriendo] = useState(false);
 
-  const [timeRemaining, setTimeRemaining] = useState(null);
-  const [intervalId, setIntervalId] = useState(null);
+  useEffect(() => {
+    let intervalo;
+    if (estaCorriendo) {
+      intervalo = setInterval(() => {
+        setContador((contador) => contador + 1);
+      }, 10); //1000
+    }
 
-  function startSimulation() {
+    if (contador >= 300) {
+      finalizarSimulacion();
+      setOpenOk(true);
+    }
+
+    return () => clearInterval(intervalo);
+  }, [contador, estaCorriendo]);
+
+  const empezarSimulacion = () => {
+    setEstaCorriendo(true);
     setSimulationStatus(1);
-
-    const endTime = Date.now() + 5 * 60 * 1000; // Tiempo en milisegundos de finalización de la simulación
-    setIntervalId(setInterval(() => {
-      const timeLeft = Math.round((endTime - Date.now()) / 1000);
-      if (timeLeft <= 0) {
-        setSimulationStatus(0);
-        clearInterval(intervalId);
-      } else {
-        const minutes = Math.floor(timeLeft / 60);
-        const seconds = timeLeft % 60;
-        setTimeRemaining(`${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
-      }
-    }, 1000)) // Actualizar el tiempo restante cada segundo (1000 milisegundos)
-
-    // Cancelar el conteo si se presiona el botón PauseCircle
-    // const cancelCountdown = () => {
-    //   setSimulationStatus(0);
-    //   clearInterval(intervalId);
-    //   setTimeRemaining(null);
-    // };
-    // const pauseCircleButton = document.querySelector('#pause-circle-button');
-    // pauseCircleButton.addEventListener('click', cancelCountdown);
-  }
-
-  const cancelCountdown = () => {
-    setSimulationStatus(0);
-    clearInterval(intervalId);
-    setTimeRemaining(null);
+    setContador(0);
   };
 
-  function endSimulation () {
+  const finalizarSimulacion = () => {
+    setEstaCorriendo(false);
     setSimulationStatus(0);
-    setTimeRemaining(null);
-    cancelCountdown()
-  }
+    setContador(0);
+  };
 
-
+  const tiempoRestante = 300 - contador;
 
   return (
     <>
@@ -143,7 +142,7 @@ const App = () => {
         <Grid container style={{ marginTop: "7rem", width: "70%", justifyContent: "center" }}>
           <Grid item>
             <p style={{ fontSize: "2.5rem", marginBottom: "5rem", fontWeight: 600 }}>
-              EL TITULO QUE LE VAYAN A PONER
+              Simulador Médico UCC
             </p>
           </Grid>
           <Grid container item xs={12} style={{ justifyContent: "space-between" }}>
@@ -157,21 +156,20 @@ const App = () => {
             alignItems: "center",
             margin: "2rem 0rem"
           }}>
-            {/* {timeRemaining !== null && ( */}
-              <Grid item style={{
-                display: timeRemaining ? "flex" : "hidden"
-              }}>
-                <p style={{
-                  fontSize: "2rem",
-                  margin: "0 1rem",
-                  fontWeight: 600
-                }}>{timeRemaining}</p>
-              </Grid>
-            {/* )} */}
+            <Grid item style={{
+              display: estaCorriendo ? "flex" : "hidden"
+            }}>
+              <p style={{
+                fontSize: "2rem",
+                margin: "0 1rem",
+                fontWeight: 600,
+                display: estaCorriendo ? "flex" : "hidden"
+              }}>{convertirSegundosAMinutos(tiempoRestante)}</p>
+            </Grid>
             <Grid item>
-              <IconButton id='pause-circle-button' disabled={simulationStatus === 0} onClick={endSimulation}
+              <IconButton id='pause-circle-button' disabled={simulationStatus === 0} onClick={finalizarSimulacion}
                 style={{
-                  backgroundColor: !timeRemaining ? "var(--disabled-grey)" : "var(--botones)",
+                  backgroundColor: !estaCorriendo ? "var(--disabled-grey)" : "var(--botones)",
                   color: "#FFFFFF",
                   margin: "0 0.3rem"
                 }}>
@@ -179,9 +177,9 @@ const App = () => {
               </IconButton>
             </Grid>
             <Grid item>
-              <IconButton disabled={simulationStatus === 1} onClick={startSimulation}
+              <IconButton disabled={simulationStatus === 1} onClick={empezarSimulacion}
                 style={{
-                  backgroundColor: timeRemaining ? "var(--disabled-grey)" : "var(--botones)",
+                  backgroundColor: estaCorriendo ? "var(--disabled-grey)" : "var(--botones)",
                   color: "#FFFFFF",
                   margin: "0 0.3rem"
 
@@ -191,8 +189,41 @@ const App = () => {
             </Grid>
           </Grid>
         </Grid>
+        <Dialog
+          open={openOk}
+          onClose={() => setOpenOk(false)}
+        >
+          <DialogTitle>
+            {"La simulación ha finalizado exitosamente"}
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Diganme que mensaje de felicitación quieren poner xd.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenOk(false)}>Cerrar</Button>
+          </DialogActions>
+        </Dialog>
+        <Dialog
+          open={openNoOk}
+          onClose={() => setOpenNoOk(false)}
+        >
+          <DialogTitle>
+            {"La simulación ha fallado"}
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Diganme que mensaje quieren poner xd.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenNoOk(false)}>Cerrar</Button>
+          </DialogActions>
+        </Dialog>
       </div>
     </>
   )
 }
+
 export default App;
