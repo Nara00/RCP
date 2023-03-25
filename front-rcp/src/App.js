@@ -76,10 +76,10 @@ const App = () => {
   }, [presion])
 
   useEffect(() => {
-    if (distancia == 0) {
+    if (distancia <= 40 && distancia >= 65) {
       setEstadoDistancia(1)
     }
-    else if (distancia == 1) {
+    else if (distancia > 40 && distancia < 65) {
       setEstadoDistancia(3)
     }
     else {
@@ -88,10 +88,10 @@ const App = () => {
   }, [distancia])
 
   useEffect(() => {
-    if (frecuencia == 0) {
+    if (frecuencia <= 60 && frecuencia >= 80) {
       setEstadoFrecuencia(1)
     }
-    else if (frecuencia == 1) {
+    else if (frecuencia > 60 && frecuencia < 80) {
       setEstadoFrecuencia(3)
     }
     else {
@@ -108,7 +108,7 @@ const App = () => {
     if (estaCorriendo) {
       intervalo = setInterval(() => {
         setContador((contador) => contador + 1);
-      }, 10); //1000
+      }, 1000); //1000
     }
 
     if (contador >= 300) {
