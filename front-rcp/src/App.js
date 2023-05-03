@@ -95,10 +95,10 @@ const App = () => {
   }, [presion])
 
   useEffect(() => {
-    if (distancia <= 40 || distancia >= 65) {
+    if (distancia <= 5 || distancia >= 6) {
       setEstadoDistancia(1)
     }
-    else if (distancia > 40 && distancia < 65) {
+    else if (distancia > 5 && distancia < 6) {
       setEstadoDistancia(3)
     }
     else {
@@ -107,10 +107,10 @@ const App = () => {
   }, [distancia])
 
   useEffect(() => {
-    if (frecuencia <= 60 || frecuencia >= 80) {
+    if (frecuencia <= 100 || frecuencia >= 120) {
       setEstadoFrecuencia(1)
     }
-    else if (frecuencia > 60 && frecuencia < 80) {
+    else if (frecuencia > 100 && frecuencia < 120) {
       setEstadoFrecuencia(3)
     }
     else {
@@ -127,7 +127,8 @@ const App = () => {
     if (estaCorriendo) {
       intervalo = setInterval(() => {
         setContador((contador) => contador + 1);
-      }, 1000); //1000
+        // }, 1000); //1000
+      }, 120000)
     }
 
     if (contador >= 300) {
@@ -153,7 +154,9 @@ const App = () => {
     setPresion('fetching');
   };
 
-  const tiempoRestante = 300 - contador;
+  // 2 minutes simulation
+  const tiempoRestante = 120 - contador;
+  // const tiempoRestante = 300 - contador;
   const _distancia = `${distancia / 10}`;
   const _presion = presion == 0 ? '--' : 'ok';
   const _frecuencia = `${frecuencia}`;
@@ -191,7 +194,10 @@ const App = () => {
               }}>{convertirSegundosAMinutos(tiempoRestante)}</p>
             </Grid>
             <Grid item>
-              <IconButton id='pause-circle-button' disabled={!estaCorriendo} onClick={finalizarSimulacion}
+              <IconButton id='pause-circle-button' disabled={!estaCorriendo} onClick={() => {
+                finalizarSimulacion();
+                setOpenUsuario(true);
+              }}
                 style={{
                   backgroundColor: !estaCorriendo ? "var(--disabled-grey)" : "var(--botones)",
                   color: "#FFFFFF",
@@ -214,15 +220,31 @@ const App = () => {
           </Grid>
         </Grid>
         <Dialog
+          open={openUsuario}
+          onClose={() => setOpenUsuario(false)}
+        >
+          <DialogTitle>
+            {"Ensayo Finalizado"}
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              El usuario ha finalizado el ensayo.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenUsuario(false)}>Cerrar</Button>
+          </DialogActions>
+        </Dialog>
+        <Dialog
           open={openOk}
           onClose={() => setOpenOk(false)}
         >
           <DialogTitle>
-            {"La simulación ha finalizado exitosamente"}
+            {"Ensayo Finalizado"}
           </DialogTitle>
           <DialogContent>
             <DialogContentText>
-              Diganme que mensaje de felicitación quieren poner xd.
+              La maniobra fue realizada correctamente.
             </DialogContentText>
           </DialogContent>
           <DialogActions>
