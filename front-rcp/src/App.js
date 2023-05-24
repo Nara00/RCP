@@ -95,10 +95,10 @@ const App = () => {
   }, [presion])
 
   useEffect(() => {
-    if (distancia <= 5 || distancia >= 6) {
+    if (distancia < 50 || distancia > 60) {
       setEstadoDistancia(1)
     }
-    else if (distancia > 5 && distancia < 6) {
+    else if (distancia >= 50 && distancia <= 60) {
       setEstadoDistancia(3)
     }
     else {
@@ -127,11 +127,10 @@ const App = () => {
     if (estaCorriendo) {
       intervalo = setInterval(() => {
         setContador((contador) => contador + 1);
-        // }, 1000); //1000
-      }, 120000)
+         }, 1000); //1000
     }
 
-    if (contador >= 300) {
+    if (contador >= 120) {
       finalizarSimulacion();
       setOpenOk(true);
     }
@@ -156,7 +155,6 @@ const App = () => {
 
   // 2 minutes simulation
   const tiempoRestante = 120 - contador;
-  // const tiempoRestante = 300 - contador;
   const _distancia = `${distancia / 10}`;
   const _presion = presion == 0 ? '--' : 'ok';
   const _frecuencia = `${frecuencia}`;

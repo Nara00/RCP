@@ -103,7 +103,7 @@ const Card = (props) => {
                             fontSize: "1.5rem",
                             textTransform: "capitalize",
                         }}
-                    >{props.tipo}</p>
+                    >{props.tipo == "presión" ? "Posición manos" : props.tipo}</p>
                 </div>
             </Grid>
 

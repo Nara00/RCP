@@ -54,18 +54,18 @@ app.get('/start', async (req, res) => {
 });
 
 
-const io = socketIo(server, { 
-    cors: {
-      origin: 'http://localhost:3000'
-    }
+const io = socketIo(server, {
+  cors: {
+    origin: 'http://localhost:3000'
+  }
 })
 
-io.on('connection',(socket)=>{
-  console.log('client connected: ',socket.id)
-  
+io.on('connection', (socket) => {
+  console.log('client connected: ', socket.id)
+
   socket.join('serial-data')
-  
-  socket.on('disconnect',(reason)=>{
+
+  socket.on('disconnect', (reason) => {
     console.log(reason)
   })
 })
@@ -73,20 +73,25 @@ io.on('connection',(socket)=>{
 port.on('readable', function () {
   // console.log(port.read().toString('utf-8'))
   let lectura = port.read().toString('utf-8')
-  console.log(lectura)
+  console.log("lectura raw: ", lectura)
   lectura_arr = lectura.split(',')
-  lectura_arr = lectura_arr.slice(0, 3);
-  lectura_arr[2] = lectura_arr[2].slice(0, -1);
-  console.log(lectura_arr)
+  // lectura_arr = lectura_arr.slice(0, 3);
+  // lectura_arr[2] = lectura_arr[2].slice(0, -1);
+  console.log("lectura parseada: ", lectura_arr)
   // io.to('serial-data').emit('lectura', port.read())
-  io.to('serial-data').emit('presion', lectura_arr[0])
-  io.to('serial-data').emit('frecuencia', lectura_arr[1])
-  io.to('serial-data').emit('distancia', lectura_arr[2])
-
+  if (lectura_arr[3] != ' \r\n') {
+    console.log("lectura de detención: ", lectura_arr[3])
+    io.to('serial-data').emit('fallo', true)
+  }
+  else {
+    io.to('serial-data').emit('presion', lectura_arr[0])
+    io.to('serial-data').emit('frecuencia', lectura_arr[1])
+    io.to('serial-data').emit('distancia', lectura_arr[2])
+  }
 })
 
 
-server.listen(PORT, err=> {
-  if(err) console.log(err)
+server.listen(PORT, err => {
+  if (err) console.log(err)
   console.log('Server running on Port ', PORT)
 })
