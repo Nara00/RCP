@@ -242,7 +242,7 @@ const App = () => {
           </DialogTitle>
           <DialogContent>
             <DialogContentText>
-              La maniobra fue realizada correctamente.
+              Tiempo de ensayo finalizado.
             </DialogContentText>
           </DialogContent>
           <DialogActions>
